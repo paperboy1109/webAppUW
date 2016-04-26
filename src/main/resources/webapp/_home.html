@@ -1,0 +1,47 @@
+<h1>UW Registration System</h1>
+
+<h2>Current Courses: {{student.first_name}} {{student.last_name}}</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>CRN</th>
+            <th>USP</th>
+            <th>Dept</th>
+            <th>Number</th>
+            <th>Section</th>
+            <th>Title</th>
+            <th>Credits</th>
+            <th>Days</th>
+            <th>Time</th>
+            <th>Room</th>
+            <th>Instructor</th>
+        </tr>
+    </thead>
+    <tbody>
+    	<tr ng-repeat="c in registered_for">
+    		<td ng-if="c.type == 'course'">{{c.row.crn}}</td>
+    		<td ng-if="c.type == 'course'">{{c.row.usp}}</td>
+    		<td ng-if="c.type == 'course'">{{c.row.subject}}</td>
+    		<td ng-if="c.type == 'course'">{{c.row.cnumber}}</td>
+    		<td ng-if="c.type == 'course'">{{c.row.section}}</td>
+    		<td ng-if="c.type == 'course'">{{c.row.title}}</td>
+    		<td ng-if="c.type == 'course'">{{c.row.credits}}</td>
+    		<td ng-if="c.type == 'course'">{{c.row.days}}</td>
+    		<td ng-if="c.type == 'course'">{{c.row.start}}-{{c.row.stop}}</td>
+    		<td ng-if="c.type == 'course'">{{c.row.bldg}}{{c.row.room}}</td>
+    		<td ng-if="c.type == 'course'">{{c.row.instructor}}</td>
+    		
+    		<td ng-if="c.type == 'note'">&nbsp;</td>
+    		<td colspan="10" ng-if="c.type == 'note'">{{c.row.note}}</td>
+    		
+    	</tr>
+    </tbody>
+    
+</table>
+
+<a href="#/register">
+	<button class="btn btn-primary">
+		Add/Drop Courses
+	</button>
+</a>

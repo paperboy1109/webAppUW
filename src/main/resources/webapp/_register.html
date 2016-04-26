@@ -1,0 +1,197 @@
+<h1>UW Registration System</h1>
+
+<h2>Registration: {{student.first_name}} {{student.last_name}}</h2>
+
+<div>
+	<h3>Current Registration</h3>
+	<table class="table table-striped">
+	    <thead>
+	        <tr>
+	            <th>Keep</th>
+	            <th>CRN</th>
+	            <th>USP</th>
+	            <th>Dept</th>
+	            <th>Number</th>
+	            <th>Section</th>
+	            <th>Title</th>
+	            <th>Credits</th>
+	            <th>Days</th>
+	            <th>Time</th>
+	            <th>Room</th>
+	            <th>Instructor</th>
+	        </tr>
+	    </thead>
+	    <tbody>
+	    	<tr ng-repeat="c in registered_for">
+	    		<td ng-if="c.type == 'course'"">
+	    			<input type="checkbox"  ng-model="c.row._keep">
+	    		</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.crn}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.usp}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.subject}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.cnumber}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.section}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.title}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.credits}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.days}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.start}}-{{c.row.stop}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.bldg}}{{c.row.room}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.instructor}}</td>
+	    		
+	    		<td ng-if="c.type == 'note'">&nbsp;</td>
+	    		<td colspan="11" ng-if="c.type == 'note'">{{c.row.note}}</td>
+	    		
+	    	</tr>
+	    </tbody>
+	</table>
+</div>
+
+<div ng-if="courses_to_add.length > 0">
+	<h3>Register for the Following Courses</h3>
+	
+	<table class="table table-striped">
+	    <thead>
+	        <tr>
+	            <th>Drop</th>
+	            <th>CRN</th>
+	            <th>USP</th>
+	            <th>Dept</th>
+	            <th>Number</th>
+	            <th>Section</th>
+	            <th>Title</th>
+	            <th>Credits</th>
+	            <th>Days</th>
+	            <th>Time</th>
+	            <th>Room</th>
+	            <th>Instructor</th>
+	        </tr>
+	    </thead>
+	    <tbody>
+	    	<tr ng-repeat="c in courses_to_add">
+	    		<td ng-if="c.type == 'course'">
+	    			<button class="btn btn-danger" ng-click="unadd(c.row.crn)">
+	    				<span class="glyphicon glyphicon-remove"></span>
+	    			</button>
+	    		</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.crn}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.usp}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.subject}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.cnumber}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.section}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.title}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.credits}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.days}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.start}}-{{c.row.stop}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.bldg}}{{c.row.room}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.instructor}}</td>
+	    		
+	    		<td ng-if="c.type == 'note'">&nbsp;</td>
+	    		<td colspan="11" ng-if="c.type == 'note'">{{c.row.note}}</td>
+	    		
+	    	</tr>
+	    </tbody>
+	</table>
+</div>
+
+<button class="btn btn-primary" ng-click="updateRegistration()">
+	Update Registration
+</button>
+
+<div class="alert alert-danger" role="alert" ng-if="error_msg != ''">
+  <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+  <span class="sr-only">Error:</span>
+  {{error_msg}}
+</div>
+
+<div>
+	<h3>Search for New Courses</h3>
+
+	Search by: 
+	<select ng-model="search_by" 
+	        ng-options="sopt as sopt.label for sopt in search_options">           
+	</select>
+	<div ng-if="search_by.value == 'crn'">
+		<form class="form-inline">
+			<div class="form-group">
+				<input type="text" class="form-control" placeholder="CRN" ng-model="$parent.search_crn">
+			</div>
+			<button class="btn btn-primary" ng-click="$parent.searchByCrn()">
+				<span class="glyphicon glyphicon-search"></span>
+			</button>
+		</form>
+	</div>
+	<div ng-if="search_by.value == 'cnumber'">
+		<form class="form-inline">
+			<div class="form-group">
+				<input type="text" class="form-control" placeholder="Dept" ng-model="$parent.search_dept">
+			</div>
+			<div class="form-group">
+				<input type="text" class="form-control" placeholder="Number" ng-model="$parent.search_cnumber">
+			</div>
+			<button class="btn btn-primary" ng-click="$parent.searchByCnumber()">
+				<span class="glyphicon glyphicon-search"></span>
+			</button>
+		</form>
+	</div>
+	<div ng-if="search_by.value == 'title'">
+		<form class="form-inline">
+			<div class="form-group">
+				<input type="text" class="form-control" placeholder="Title" ng-model="$parent.search_title">
+			</div>
+			<button class="btn btn-primary" ng-click="$parent.searchByTitle()">
+				<span class="glyphicon glyphicon-search"></span>
+			</button>
+		</form>
+	</div>
+	
+	<div>
+		{{status}}
+	</div>
+	
+	
+	<table class="table table-striped" ng-if="search_results.length > 0">
+	    <thead>
+	        <tr>
+	            <th>Add</th>
+	            <th>CRN</th>
+	            <th>USP</th>
+	            <th>Dept</th>
+	            <th>Number</th>
+	            <th>Section</th>
+	            <th>Title</th>
+	            <th>Credits</th>
+	            <th>Days</th>
+	            <th>Time</th>
+	            <th>Room</th>
+	            <th>Instructor</th>
+	        </tr>
+	    </thead>
+	    <tbody>
+	    	<tr ng-repeat="c in search_results">
+	    		<td ng-if="c.type == 'course'">
+	    			<button class="btn btn-success" ng-click="addCrn(c.row.crn)">
+	    				<span class="glyphicon glyphicon-plus"></span>
+	    			</button>
+	    		</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.crn}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.usp}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.subject}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.cnumber}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.section}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.title}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.credits}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.days}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.start}}-{{c.row.stop}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.bldg}}{{c.row.room}}</td>
+	    		<td ng-if="c.type == 'course'">{{c.row.instructor}}</td>
+	    		
+	    		<td ng-if="c.type == 'note'">&nbsp;</td>
+	    		<td colspan="11" ng-if="c.type == 'note'">{{c.row.note}}</td>
+	    		
+	    	</tr>
+	    </tbody>
+	</table>
+</div>
+
+<br/>
+
