@@ -147,6 +147,60 @@ public class UWregDAOImpl implements UWregDAO {
 	public List<Course> getCoursesRegistered(String wnumber) {
     	// TODO 4 (10 pts) - Get the courses the given student is registered for
 	    List<Course> courses = null;
+	    
+	    
+	    List<Course> listOfCourses = jdbcTemplate.query("select * " +
+	    												"FROM coscuw.enrolledin " +
+	    												"JOIN coscuw.offeringof ON enrolledin.CRN = offeringof.CRN " +
+	    												"JOIN coscuw.coursemeetings ON enrolledin.CRN = coursemeetings.crn " +
+	    												"JOIN coscuw.coursedetails ON enrolledin.CRN = coursedetails.CRN " +
+	    												" WHERE wNumber = 'w87501680' "
+	    , 
+	    new Object[] { wnumber }, new RowMapper<Course>() {
+	    	
+			public Course mapRow(ResultSet myRs, int rowNum) throws SQLException {
+								
+				// Course
+				String courseCRN = myRs.getString("crn");
+				String courseUSP = myRs.getString("usp");
+				String courseSubject = myRs.getString("subject");
+				String courseNumber = myRs.getString("number");
+				String courseSection = myRs.getString("section");
+				String courseTitle = myRs.getString("title");
+				
+				// String courseCredits= myRs.getString("");
+				int courseCredits = 1;
+				
+				String courseDay = myRs.getString("days");
+				String courseStart = myRs.getString("start");
+				String courseStop = myRs.getString("stop");
+				String courseBuilding = myRs.getString("bldg");
+				String courseRoom = myRs.getString("room");
+								
+				// String courseInstructor= myRs.getString("");
+				String courseInstructor = "Gamboa";
+				
+				String[] courseNotes = {"Note1", "Note2"};
+				
+				String studentWNum = myRs.getString("wNumber");
+				String studentLastName = myRs.getString("lastname");
+				String studentFirstName = myRs.getString("firstname");
+				String studentGender = myRs.getString("gender");
+				
+				//For debugging purposes:
+				System.out.printf("%s, %s, %s, %s\n", studentWNum, studentLastName, studentFirstName, studentGender);
+				
+				// Student student = new Student(studentWNum, studentFirstName, studentLastName, studentGender);
+				Course course = new Course(courseCRN, courseUSP, courseSubject, courseNumber, courseSection, courseTitle, courseCredits, courseDay, courseStart, courseStop, courseBuilding, courseRoom, courseInstructor, courseNotes);
+				
+				//return student;
+				return course;
+				
+			}
+	    
+	    });
+	    
+	    courses = listOfCourses;
 	    return courses;
 	}
 
