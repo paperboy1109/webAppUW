@@ -4,11 +4,13 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 
 import uwyo.cs.uwreg.dao.model.Course;
 import uwyo.cs.uwreg.dao.model.Student;
@@ -25,10 +27,45 @@ public class UWregDAOImpl implements UWregDAO {
 	public Student getStudentByWnumber(String wnumber) {
     	// TODO 3 (10 pts) - Get the record of student with given wnumber
 	    
-		Student student = null;	 
+		
+		// careful ..
+		//Student student = null;
+		
+		// Using Spring
+		List<Student> listOfStudents = jdbcTemplate.query("select * from coscuw.students ", new RowMapper<Student>() {
+		//List<Student> listOfStudents = jdbcTemplate.query("select * from coscuw.students WHERE wNumber = ?", wnumber, new RowMapper<Student>() {
+
+
+			public Student mapRow(ResultSet myRs, int rowNum) throws SQLException {
+				
+				// Example code
+				//Offer offer = new Offer();
+				//offer.setId(myRs.getInt("id"));
+				//offer.setName(myRs.getString("name"));
+				//offer.setText(myRs.getString("text"));
+				//offer.setEmail(myRs.getString("email"));
+				//return offer;
+				
+				// Student
+				String studentWNum = myRs.getString("wNumber");
+				String studentLastName = myRs.getString("lastname");
+				String studentFirstName = myRs.getString("firstname");
+				String studentGender = myRs.getString("gender");
+				
+				//For debugging purposes:
+				System.out.printf("%s, %s, %s, %s\n", studentWNum, studentLastName, studentFirstName, studentGender);
+				
+				Student student = new Student(studentWNum, studentFirstName, studentLastName, studentGender);
+				return student;
+				
+			}
+			
+		});
 	    
+		
+		
 	    // Using JDBC only (no Spring)
-	    Connection myConn = null;
+	    /*Connection myConn = null;
 		PreparedStatement myStmt = null;
 		ResultSet myRs = null;
 		
@@ -39,7 +76,7 @@ public class UWregDAOImpl implements UWregDAO {
 			
 			// 2. Prepare statement
 			//myStmt = myConn.prepareStatement("select * from enrolledin where wNumber = ? and CRN > ? ");
-			myStmt = myConn.prepareStatement("select * from coscuw.students where wNumber = ? ");
+			myStmt = myConn.prepareStatement("select * from coscuw.students WHERE wNumber = ? ");
 			
 			// 3. Set the parameters
 			//myStmt.setString(1, "w87501680");
@@ -61,7 +98,7 @@ public class UWregDAOImpl implements UWregDAO {
 				
 				System.out.printf("%s, %s, %s, %s\n", studentWNum, studentLastName, studentFirstName, studentGender);
 				
-				student = new Student(studentWNum, studentFirstName, studentLastName, studentGender);
+				//student = new Student(studentWNum, studentFirstName, studentLastName, studentGender);
 			}
 			
 			
@@ -85,11 +122,13 @@ public class UWregDAOImpl implements UWregDAO {
 			if (myConn != null) {
 				//myConn.close();
 			}
-		}
+		}*/
 	    
 	    
-	    
-		return student;
+		
+	    // careful ...
+		//return student;
+		return listOfStudents.get(0);
     }
 
 	@Override
