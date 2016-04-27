@@ -32,8 +32,20 @@ public class UWregDAOImpl implements UWregDAO {
 		//Student student = null;
 		
 		// Using Spring
-		List<Student> listOfStudents = jdbcTemplate.query("select * from coscuw.students ", new RowMapper<Student>() {
-		//List<Student> listOfStudents = jdbcTemplate.query("select * from coscuw.students WHERE wNumber = ?", wnumber, new RowMapper<Student>() {
+		// setString(1, "w87501680"), myStmt
+		
+		// This one works but doesn't take the w-number into account
+		//List<Student> listOfStudents = jdbcTemplate.query("select * from coscuw.students LIMIT 10", new RowMapper<Student>() {
+			
+		List<Student> listOfStudents = jdbcTemplate.query("select * from coscuw.students WHERE wNumber = ?", new Object[] { wnumber }, new RowMapper<Student>() {
+		
+/*		List<Student> listOfStudents = jdbcTemplate.query("select * from coscuw.students WHERE wNumber = ?", 
+				new PreparedStatementSetter() {
+            	public void setValues(PreparedStatement preparedStatement) throws
+            		SQLException {
+            			preparedStatement.setString(1, wnumber);
+            		}
+			}, new RowMapper<Student>() {*/
 
 
 			public Student mapRow(ResultSet myRs, int rowNum) throws SQLException {
