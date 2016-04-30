@@ -153,6 +153,7 @@ public class UWregDAOImpl implements UWregDAO {
 	    												"FROM coscuw.enrolledin " +
 	    												"JOIN coscuw.coursedetails ON enrolledin.CRN = coursedetails.CRN " +
 	    												"JOIN coscuw.offeringof ON enrolledin.CRN = offeringof.CRN " +
+	    												"JOIN coscuw.scheduledcourses ON enrolledin.CRN = scheduledcourses.crn " +
 	    												"WHERE wNumber = ? "
 	    , 
 	    new Object[] { wnumber }, new RowMapper<Course>() {
@@ -169,7 +170,9 @@ public class UWregDAOImpl implements UWregDAO {
 				String courseSubject = myRs.getString("subject");
 				System.out.printf("subject: %s \n", courseSubject);
 				String courseNumber = myRs.getString("number");
+				System.out.printf("number: %s \n", courseNumber);
 				String courseSection = myRs.getString("section");
+				System.out.printf("section: %s \n", courseSection);
 				String courseTitle = myRs.getString("title");
 				
 				// String courseCredits= myRs.getString("");
