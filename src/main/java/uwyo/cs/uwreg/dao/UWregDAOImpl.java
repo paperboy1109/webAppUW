@@ -148,22 +148,26 @@ public class UWregDAOImpl implements UWregDAO {
     	// TODO 4 (10 pts) - Get the courses the given student is registered for
 	    List<Course> courses = null;
 	    
-	    
+	    System.out.printf("Working on TODO 4\n");
 	    List<Course> listOfCourses = jdbcTemplate.query("select * " +
 	    												"FROM coscuw.enrolledin " +
-	    												"JOIN coscuw.offeringof ON enrolledin.CRN = offeringof.CRN " +
-	    												"JOIN coscuw.coursemeetings ON enrolledin.CRN = coursemeetings.crn " +
 	    												"JOIN coscuw.coursedetails ON enrolledin.CRN = coursedetails.CRN " +
-	    												" WHERE wNumber = 'w87501680' "
+	    												"JOIN coscuw.offeringof ON enrolledin.CRN = offeringof.CRN " +
+	    												"WHERE wNumber = ? "
 	    , 
 	    new Object[] { wnumber }, new RowMapper<Course>() {
 	    	
 			public Course mapRow(ResultSet myRs, int rowNum) throws SQLException {
+				
+				System.out.printf("Working on mapRow, TODO 4 \n");
 								
 				// Course
 				String courseCRN = myRs.getString("crn");
+				System.out.printf("crn: %s \n", courseCRN);
 				String courseUSP = myRs.getString("usp");
+				System.out.printf("usp: %s \n", courseUSP);
 				String courseSubject = myRs.getString("subject");
+				System.out.printf("subject: %s \n", courseSubject);
 				String courseNumber = myRs.getString("number");
 				String courseSection = myRs.getString("section");
 				String courseTitle = myRs.getString("title");
@@ -188,10 +192,11 @@ public class UWregDAOImpl implements UWregDAO {
 				String studentGender = myRs.getString("gender");
 				
 				//For debugging purposes:
-				System.out.printf("%s, %s, %s, %s\n", studentWNum, studentLastName, studentFirstName, studentGender);
+				//System.out.printf("%s, %s, %s, %s\n", studentWNum, studentLastName, studentFirstName, studentGender);
 				
 				// Student student = new Student(studentWNum, studentFirstName, studentLastName, studentGender);
 				Course course = new Course(courseCRN, courseUSP, courseSubject, courseNumber, courseSection, courseTitle, courseCredits, courseDay, courseStart, courseStop, courseBuilding, courseRoom, courseInstructor, courseNotes);
+				//Course course = new Course(courseCRN, courseUSP, courseSubject, courseNumber, courseSection, courseTitle, courseCredits, courseDay, courseStart, courseStop, courseBuilding, courseRoom, courseInstructor, courseNotes);
 				
 				//return student;
 				return course;
