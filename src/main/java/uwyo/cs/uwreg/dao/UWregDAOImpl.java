@@ -149,11 +149,18 @@ public class UWregDAOImpl implements UWregDAO {
 	    List<Course> courses = null;
 	    
 	    System.out.printf("Working on TODO 4\n");
-	    List<Course> listOfCourses = jdbcTemplate.query("select * " +
+	    List<Course> listOfCourses = jdbcTemplate.query("SELECT enrolledin.CRN, coursedetails.usp, offeringof.subject, " +
+	    												"offeringof.number, scheduledcourses.section, offeringof.title, " +
+	    												"courses.credits, coursemeetings.days, coursemeetings.start, coursemeetings.stop, " +
+	    												"coursemeetings.bldg, coursemeetings.room " +
 	    												"FROM coscuw.enrolledin " +
-	    												"JOIN coscuw.coursedetails ON enrolledin.CRN = coursedetails.CRN " +
 	    												"JOIN coscuw.offeringof ON enrolledin.CRN = offeringof.CRN " +
-	    												"JOIN coscuw.scheduledcourses ON enrolledin.CRN = scheduledcourses.crn " +
+	    												"JOIN coscuw.coursemeetings ON enrolledin.CRN = coursemeetings.crn " +
+	    												"JOIN coscuw.coursedetails ON enrolledin.CRN = coursedetails.CRN " +
+	    												"JOIN coscuw.scheduledcourses ON enrolledin.CRN = scheduledcourses.CRN " +
+	    												"JOIN coscuw.courses ON offeringof.subject=courses.subject " +
+	    													"AND offeringof.number=courses.number " +
+	    													"AND offeringof.title = courses.title " +
 	    												"WHERE wNumber = ? "
 	    , 
 	    new Object[] { wnumber }, new RowMapper<Course>() {
@@ -163,7 +170,7 @@ public class UWregDAOImpl implements UWregDAO {
 				System.out.printf("Working on mapRow, TODO 4 \n");
 								
 				// Course
-				String courseCRN = myRs.getString("crn");
+				String courseCRN = myRs.getString("CRN");
 				System.out.printf("crn: %s \n", courseCRN);
 				String courseUSP = myRs.getString("usp");
 				System.out.printf("usp: %s \n", courseUSP);
@@ -175,24 +182,29 @@ public class UWregDAOImpl implements UWregDAO {
 				System.out.printf("section: %s \n", courseSection);
 				String courseTitle = myRs.getString("title");
 				
-				// String courseCredits= myRs.getString("");
-				int courseCredits = 1;
+				
+				
+				// String courseCredits= myRs.getString(""); 
+				//int courseCredits = 1;
+				int courseCredits = myRs.getInt("credits");
+				System.out.printf("credits: %d \n", courseCredits);
 				
 				String courseDay = myRs.getString("days");
+				System.out.printf("days: %s \n", courseDay);
 				String courseStart = myRs.getString("start");
+				System.out.printf("start: %s \n", courseStart);
 				String courseStop = myRs.getString("stop");
+				System.out.printf("stop: %s \n", courseStop);
 				String courseBuilding = myRs.getString("bldg");
+				System.out.printf("bldg: %s \n", courseBuilding);
 				String courseRoom = myRs.getString("room");
+				System.out.printf("room: %s \n", courseRoom);
 								
 				// String courseInstructor= myRs.getString("");
 				String courseInstructor = "Gamboa";
 				
 				String[] courseNotes = {"Note1", "Note2"};
-				
-				String studentWNum = myRs.getString("wNumber");
-				String studentLastName = myRs.getString("lastname");
-				String studentFirstName = myRs.getString("firstname");
-				String studentGender = myRs.getString("gender");
+		
 				
 				//For debugging purposes:
 				//System.out.printf("%s, %s, %s, %s\n", studentWNum, studentLastName, studentFirstName, studentGender);
@@ -200,6 +212,7 @@ public class UWregDAOImpl implements UWregDAO {
 				// Student student = new Student(studentWNum, studentFirstName, studentLastName, studentGender);
 				Course course = new Course(courseCRN, courseUSP, courseSubject, courseNumber, courseSection, courseTitle, courseCredits, courseDay, courseStart, courseStop, courseBuilding, courseRoom, courseInstructor, courseNotes);
 				//Course course = new Course(courseCRN, courseUSP, courseSubject, courseNumber, courseSection, courseTitle, courseCredits, courseDay, courseStart, courseStop, courseBuilding, courseRoom, courseInstructor, courseNotes);
+
 				
 				//return student;
 				return course;
