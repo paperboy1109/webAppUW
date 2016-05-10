@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -182,8 +183,6 @@ public class UWregDAOImpl implements UWregDAO {
 				System.out.printf("section: %s \n", courseSection);
 				String courseTitle = myRs.getString("title");
 				
-				
-				
 				// String courseCredits= myRs.getString(""); 
 				//int courseCredits = 1;
 				int courseCredits = myRs.getInt("credits");
@@ -202,7 +201,6 @@ public class UWregDAOImpl implements UWregDAO {
 								
 				// String courseInstructor= myRs.getString("");
 				String courseInstructor = "Gamboa";
-				
 				String[] courseNotes = {"Note1", "Note2"};
 		
 				
@@ -220,7 +218,47 @@ public class UWregDAOImpl implements UWregDAO {
 			}
 	    
 	    });
+
 	    
+	 // Combine notes from the same CRN into a single Course object ---------------------------------------------
+	 // ---------------------------------------------------------------------------------------------------------
+        System.out.println(" === COMBINING COURSES === \n");
+        String previousCRN = "x123";
+        String previousDays = "";
+      //-------------------------------------
+        String storedSubject = "";
+        String storedUsp = "";
+        String storedCNumber = "";
+        String storedSection = "";
+        String storedTitle = "";
+        int storedCredits = 0;
+        
+        String storedStart = "";
+        String storedStop = ""; 
+        String storedBuilding = "";
+        String storedRoom = "";
+        
+        String storedInstructor = "";
+      //-------------------------------------
+        
+        ArrayList<String> tempNotesArray = new ArrayList<String>();
+        List<Course> finalList = new ArrayList<Course>();
+        
+        int loopCounter = 0;
+        
+        for (Course element : listOfCourses) {
+
+            String currentCRN = null;
+            String currentDays = null;
+            String[] currentNotes = null;
+            
+            loopCounter++ ;
+            System.out.println("\n\nWhat's the count?");
+            System.out.println(loopCounter);
+        }
+   	 // ---------------------------------------------------------------------------------------------------------
+	    
+        //TODO: RETURN A LIST OF COURSES WITH NOTES AND DAYS COMBINED -- AND DUPLICATES ELIMINATED
 	    courses = listOfCourses;
 	    return courses;
 	}
