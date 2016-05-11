@@ -248,7 +248,7 @@ public class UWregDAOImpl implements UWregDAO {
         
         int loopCounter = 0;
         
-        // Loop through the courses that were returned as the ResultSet
+        // Loop through the courses that were returned from the ResultSet
         for (Course element : listOfCourses) {
 
             String currentCRN = null;
@@ -471,8 +471,8 @@ public class UWregDAOImpl implements UWregDAO {
         } // end for loop
    	 // ---------------------------------------------------------------------------------------------------------
 	    
-        //TODO: RETURN A LIST OF COURSES WITH NOTES AND DAYS COMBINED -- AND DUPLICATES ELIMINATED
-	    //courses = listOfCourses;
+
+        //RETURN A LIST OF COURSES WITH NOTES AND DAYS COMBINED -- AND DUPLICATES ELIMINATED	    
         courses = finalList;
 	    return courses;
 	}
@@ -481,6 +481,78 @@ public class UWregDAOImpl implements UWregDAO {
 	public List<Course> getCoursesByCrn(String crn) {
     	// TODO 5 (10 pts) - Get the course with the given crn, or an empty list if no such course exists
 	    List<Course> courses = null;
+	    
+	    System.out.printf("Working on TODO 5\n");
+	    List<Course> listOfCourses = jdbcTemplate.query("SELECT offeringof.CRN, coursedetails.usp, offeringof.subject, " +
+	    												"offeringof.number, scheduledcourses.section, offeringof.title, " +
+	    												"courses.credits, coursemeetings.days, coursemeetings.start, coursemeetings.stop, " +
+	    												"coursemeetings.bldg, coursemeetings.room, instructors.lastname, instructors.firstname, " +
+	    												"coursenotes.note " +
+	    												"FROM coscuw.offeringof " +	    												
+	    												"JOIN coscuw.coursemeetings ON offeringof.CRN = coursemeetings.crn " +
+	    												"JOIN coscuw.coursedetails ON offeringof.CRN = coursedetails.CRN " +
+	    												"JOIN coscuw.scheduledcourses ON offeringof.CRN = scheduledcourses.CRN " +
+	    												"JOIN coscuw.courses ON offeringof.subject=courses.subject " +
+	    													"AND offeringof.number=courses.number " +
+	    													"AND offeringof.title = courses.title " +
+	    												"LEFT JOIN coscuw.coursenotes ON offeringof.CRN = coursenotes.CRN " +
+	    												"JOIN coscuw.instructorfor ON offeringof.CRN = instructorfor.CRN " +
+	    												"JOIN coscuw.instructors ON instructorfor.id = instructors.id " +
+	    												"WHERE offeringof.CRN = ? "
+	    , 
+	    new Object[] { crn }, new RowMapper<Course>() {
+	    	
+	    	public Course mapRow(ResultSet myRs, int rowNum) throws SQLException {
+				
+				System.out.printf("Working on mapRow, TODO 5 \n");
+				
+			
+				// Course
+				String courseCRN = myRs.getString("CRN");
+				System.out.printf("crn: %s \n", courseCRN);
+				String courseUSP = myRs.getString("usp");
+				System.out.printf("usp: %s \n", courseUSP);
+				String courseSubject = myRs.getString("subject");
+				System.out.printf("subject: %s \n", courseSubject);
+				String courseNumber = myRs.getString("number");
+				System.out.printf("number: %s \n", courseNumber);
+				String courseSection = myRs.getString("section");
+				System.out.printf("section: %s \n", courseSection);
+				String courseTitle = myRs.getString("title");
+				
+				int courseCredits = myRs.getInt("credits");
+				System.out.printf("credits: %d \n", courseCredits);
+				
+				String courseDay = myRs.getString("days");
+				System.out.printf("days: %s \n", courseDay);
+				String courseStart = myRs.getString("start");
+				System.out.printf("start: %s \n", courseStart);
+				String courseStop = myRs.getString("stop");
+				System.out.printf("stop: %s \n", courseStop);
+				String courseBuilding = myRs.getString("bldg");
+				System.out.printf("bldg: %s \n", courseBuilding);
+				String courseRoom = myRs.getString("room");
+				System.out.printf("room: %s \n", courseRoom);
+								
+				// String courseInstructor= myRs.getString("");
+				String courseInstructor = "Gamboa";
+				String[] courseNotes = {"Note1", "Note2"};
+	    
+				
+				
+				
+				
+				Course course = new Course(courseCRN, courseUSP, courseSubject, courseNumber, courseSection, courseTitle, courseCredits, courseDay, courseStart, courseStop, courseBuilding, courseRoom, courseInstructor, courseNotes);				
+
+				return course;
+				
+			}
+	    
+	    });
+	    
+	    
+	    
+	    courses = listOfCourses;
 		return courses;
 	}
 	
