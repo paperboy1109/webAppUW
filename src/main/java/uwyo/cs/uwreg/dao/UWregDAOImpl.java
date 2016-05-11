@@ -224,7 +224,7 @@ public class UWregDAOImpl implements UWregDAO {
 	 // ---------------------------------------------------------------------------------------------------------
         System.out.println(" === COMBINING COURSES === \n");
         String previousCRN = "x123";
-        String previousDays = "";
+        String previousDay = "";
       //-------------------------------------
         String storedSubject = "";
         String storedUsp = "";
@@ -272,7 +272,7 @@ public class UWregDAOImpl implements UWregDAO {
             System.out.println("Here are the days");
             System.out.println(currentDays);
             System.out.println("previousDays is ");
-            System.out.println(previousDays);
+            System.out.println(previousDay);
             // Get the current info
             currentNotes = element.getNotes();
             System.out.println("The number of notes is:");
@@ -282,7 +282,7 @@ public class UWregDAOImpl implements UWregDAO {
             System.out.println(currentNotes[1]);
             
             // (1 of 7) Ignore (consecutive) duplicates
-            if( (currentCRN.equals(previousCRN)) && (currentDays.equals(previousDays)) ) {
+            if( (currentCRN.equals(previousCRN)) && (currentDays.equals(previousDay)) ) {
             	System.out.println("Duplicate course found");
             	
             // (2 of 7) A repeated CRN, with more CRNs to come
@@ -294,16 +294,15 @@ public class UWregDAOImpl implements UWregDAO {
                     tempNotesArray.add(currentNotes[i]);
                 }
                 
-                //TODO: Fix this
-                //Since the CRN has not changed, combine the days 
-                previousDays = previousDays + currentDays;
-                System.out.println("Here are the days UPDATED");
-                System.out.println(previousDays);
-                
-                //
+                //Since the CRN has not changed, combine the days
                 storedDays = storedDays + currentDays;
                 System.out.println("Here are the storedDays UPDATED");
                 System.out.println(storedDays);
+                
+                //Keep track of the single, most recent day for comparison
+                previousDay = currentDays;
+                System.out.println("Here is previousDay UPDATED");
+                System.out.println(previousDay);
                 
 
             // (3 of 7) A repeated CRN, with no more CRNs to check
@@ -314,24 +313,19 @@ public class UWregDAOImpl implements UWregDAO {
                     tempNotesArray.add(currentNotes[i]);
                 }
                 
-                //TODO: Fix this
                 //Since the CRN has not changed, combine the days
-                previousDays = previousDays + currentDays;
-                System.out.println("Here are the days UPDATED");
-                System.out.println(previousDays);
-                
                 storedDays = storedDays + currentDays;
                 System.out.println("Here are the storedDays UPDATED");
-                System.out.println(storedDays);
+                System.out.println(storedDays);                                            
                 
                 // Create a Course object 
-                String completeDays = "";
-                completeDays = previousDays;
+                //String completeDays = "";
+                //completeDays = storedDays;
                 
                 String[] completeNotes = new String[tempNotesArray.size()];
                 completeNotes = tempNotesArray.toArray(completeNotes);
                 
-                Course completeCourse = new Course(previousCRN, storedUsp, storedSubject, storedCNumber, storedSection, storedTitle, storedCredits, completeDays, storedStart, storedStop, storedBuilding, storedRoom, storedInstructor, completeNotes);
+                Course completeCourse = new Course(previousCRN, storedUsp, storedSubject, storedCNumber, storedSection, storedTitle, storedCredits, storedDays, storedStart, storedStop, storedBuilding, storedRoom, storedInstructor, completeNotes);
                 finalList.add(completeCourse);
                 
             // (4 of 7) The last CRN is being read in and it's not also the first (and not a repeat)
@@ -340,13 +334,13 @@ public class UWregDAOImpl implements UWregDAO {
                 System.out.println("This is the last shot \n");
 
                 //Create an object for the previous course
-                String completeDays = "";
-                completeDays = previousDays;
+                //String completeDays = "";
+                //completeDays = previousDay;
                 
                 String[] completeNotes = new String[tempNotesArray.size()];
                 completeNotes = tempNotesArray.toArray(completeNotes);
                 
-                Course completeCourse = new Course(previousCRN, storedUsp, storedSubject, storedCNumber, storedSection, storedTitle, storedCredits, completeDays, storedStart, storedStop, storedBuilding, storedRoom, storedInstructor, completeNotes);
+                Course completeCourse = new Course(previousCRN, storedUsp, storedSubject, storedCNumber, storedSection, storedTitle, storedCredits, storedDays, storedStart, storedStop, storedBuilding, storedRoom, storedInstructor, completeNotes);
                 finalList.add(completeCourse);
                 
                 
@@ -376,11 +370,13 @@ public class UWregDAOImpl implements UWregDAO {
                 previousCRN = currentCRN;
                 System.out.println("previousCRN has been updated to: ");
                 System.out.println(previousCRN);
+                
                 //Save the notes and days
                 for(int i=0; i < currentNotes.length; i++){
                     tempNotesArray.add(currentNotes[i]);
                 }
-                previousDays = currentDays;
+                storedDays = currentDays;
+                      
                 // Save other course info
                 //-------------------------------------
                 storedSubject = element.getSubject();
@@ -397,6 +393,9 @@ public class UWregDAOImpl implements UWregDAO {
                 
                 storedInstructor = element.getInstructor();
                 //-------------------------------------
+                
+                //Update the previous day
+                previousDay = currentDays;
                 
 
             // (6 of 7) There is only one CRN
@@ -426,31 +425,29 @@ public class UWregDAOImpl implements UWregDAO {
             } else {
                 System.out.println("new course found");
                 // Create a Course object for the old course
-                String completeDays = "";
-                completeDays = previousDays;
+                //String completeDays = "";
+                //completeDays = previousDay;
                 
                 String[] completeNotes = new String[tempNotesArray.size()];
                 completeNotes = tempNotesArray.toArray(completeNotes);
-                /*
-                for(String s : completeNotes){
-                    System.out.println(s);
-                }
-                */
-                Course completeCourse = new Course(previousCRN, storedUsp, storedSubject, storedCNumber, storedSection, storedTitle, storedCredits, completeDays, storedStart, storedStop, storedBuilding, storedRoom, storedInstructor, completeNotes);
-                finalList.add(completeCourse);
-                System.out.println(finalList.size());
 
-                // Save the CRN, days, and notes
+                Course completeCourse = new Course(previousCRN, storedUsp, storedSubject, storedCNumber, storedSection, storedTitle, storedCredits, storedDays, storedStart, storedStop, storedBuilding, storedRoom, storedInstructor, completeNotes);
+                finalList.add(completeCourse);
+                //System.out.println(finalList.size());
+
+                // Save the (new) CRN, days, and notes
                 previousCRN = currentCRN;
-                previousDays = currentDays;
+                previousDay = currentDays;
                 System.out.println("Here are the days UPDATED");
-                System.out.println(previousDays);
-                // Update the temporary notes array
+                System.out.println(previousDay);                
                 tempNotesArray.clear();
                 for(int i=0; i < currentNotes.length; i++){
                     tempNotesArray.add(currentNotes[i]);
                 }
-                // Save other course info
+                
+                storedDays = currentDays;
+                
+                // Save other (new) course info
                 //-------------------------------------
                 storedSubject = element.getSubject();
                 storedUsp = element.getUsp();
