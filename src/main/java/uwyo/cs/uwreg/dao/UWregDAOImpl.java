@@ -796,11 +796,55 @@ public class UWregDAOImpl implements UWregDAO {
 		System.out.println("  ==-=-=-=-=-=-=- For the new schedule the unit total is: ==-=-=-=-=-=-=-  ");
 		System.out.println(totalUnits);
 		
+		// Find out whether there is a time conflict
+		String course1CRN = "";
+		List<Integer> courseMeeting1Times;
+		List<Integer> courseMeeting2Times;
+		String courseMeeting1Day;
+		boolean timeConflict = false;
+			// Compare course meeting times
+		System.out.println("  ==-=-=-=-=-=-=- Checking for schedule conflicts  ");
+		outerloop:
+		for (Course element : newSchedule) {
+								
+			//List<Integer> tempTime;
+			//String tempDays;
+			
+	  		//System.out.println(getTimeSequence(element));
+			course1CRN = element.getCrn();
+			System.out.println("  CRN  ");
+			System.out.println(course1CRN);
+			courseMeeting1Times = getTimeSequence(element);
+			courseMeeting1Day = element.getDays();
+			System.out.println(courseMeeting1Day);
+			// storedDays.contains(currentDays)  previousCRN.equals("x123") 
+			
+			for (Course j : newSchedule) {				
+				if(!course1CRN.equals(j.getCrn()) ){
+					if ( (courseMeeting1Day.contains(j.getDays())) || (j.getDays().contains(courseMeeting1Day)) ) {
+						courseMeeting2Times = getTimeSequence(j);
+						courseMeeting1Times.retainAll(courseMeeting2Times);
+						System.out.println("Compare the times: ");
+						System.out.println(courseMeeting1Times);
+						timeConflict = courseMeeting1Times.isEmpty();
+						System.out.println(timeConflict);
+						if (timeConflict){
+							break outerloop;
+						}
+					}
+					
+				}
+			
+			}
+	  	} //end loop through new schedule
+		
 		
 		
 		// Check to see if the student is registered for the proper number of units
-		if ( (totalUnits < 12) || (totalUnits > 18) ) {
-			System.out.println("The student is not enrolled in enough courses");
+		// and that there is no time conflict
+		if ( timeConflict || (totalUnits < 12) || (totalUnits > 18) ) {
+			//System.out.println("The student is not enrolled in enough courses");
+			System.out.println("The student does not have a valid schedule");
 			
 			// Restore the original schedule
 				// Delete current CRNs
@@ -821,7 +865,7 @@ public class UWregDAOImpl implements UWregDAO {
 				
 			}
 			
-			
+			throw new UWregDAOException("Improper unit total");						
 			
 		}
 		
