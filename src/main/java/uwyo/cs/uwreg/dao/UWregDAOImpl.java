@@ -777,19 +777,56 @@ public class UWregDAOImpl implements UWregDAO {
 			for (String element : drops) {
 				 System.out.printf("Courses to remove: %s \n", element);
 				 System.out.println(element);
-				// Add courses
+				// Remove courses
 				 System.out.println("About to use jdbcTemplate ... ");
 				 jdbcTemplate.update("DELETE FROM coscuw.enrolledin WHERE wNumber = ? AND CRN = ? LIMIT 1 ", wnumber, element );
 				
 			 }
 		}
 		
+		
+		
 		// Get the new schedule
 		List<Course> newSchedule = getCoursesRegistered(wnumber);
+		List<String> newCRNs = getCRNsForCourses(newSchedule);
+		System.out.println("The new schedule is: ");
+		System.out.println(newCRNs);
 		// Get the number of units for the new schedule
 		int totalUnits = getTotalUnits(newSchedule);
 		System.out.println("  ==-=-=-=-=-=-=- For the new schedule the unit total is: ==-=-=-=-=-=-=-  ");
 		System.out.println(totalUnits);
+		
+		
+		
+		// Check to see if the student is registered for the proper number of units
+		if ( (totalUnits < 12) || (totalUnits > 18) ) {
+			System.out.println("The student is not enrolled in enough courses");
+			
+			// Restore the original schedule
+				// Delete current CRNs
+			for (String element : newCRNs) {
+				 System.out.printf("Courses to remove: %s \n", element);
+				 System.out.println(element);				
+				 System.out.println("About to use jdbcTemplate ... ");
+				 jdbcTemplate.update("DELETE FROM coscuw.enrolledin WHERE wNumber = ? AND CRN = ? LIMIT 1 ", wnumber, element );
+				
+			 } 
+				// Insert the original CRNs
+			for (String element : originalCRNs) {
+				System.out.printf("Courses to add: %s \n", element);
+				 System.out.println(element);
+				// Add courses
+				 System.out.println("About to use jdbcTemplate ... ");
+				 jdbcTemplate.update("INSERT INTO coscuw.enrolledin (wNumber, CRN) VALUES (?, ?) ", wnumber, element );
+				
+			}
+			
+			
+			
+		}
+		
+		
+		
 		
 				 		
 		 
