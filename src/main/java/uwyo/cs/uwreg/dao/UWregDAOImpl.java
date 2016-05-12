@@ -1,5 +1,7 @@
 package uwyo.cs.uwreg.dao;
 
+
+//import java.util.stream.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -201,6 +203,9 @@ public class UWregDAOImpl implements UWregDAO {
 								
 				// String courseInstructor= myRs.getString("");
 				String courseInstructor = "Gamboa";
+				//String courseInstructorLast = myRs.getString("lastname");
+				//String courseInstructorFirst = myRs.getString("firstname");
+				//String courseInstructor = courseInstructorLast + ", " + courseInstructorFirst;
 				String[] courseNotes = {"Note1", "Note2"};
 		
 				
@@ -481,10 +486,20 @@ public class UWregDAOImpl implements UWregDAO {
         //courses = finalList;
         //finalList.clear();
 	    
-	    
+	    	  
 	    
 	  //RETURN A LIST OF COURSES WITH NOTES AND DAYS COMBINED -- AND DUPLICATES ELIMINATED
         courses = condenseCourseSchedule(listOfCourses);
+        	// Is the student full time?
+  	  	System.out.printf("The total number of units in this schedule is:  ");
+  	  	System.out.println(getTotalUnits(courses));
+  	  	System.out.printf("The CRNs are:  ");
+	  	System.out.println(getCRNsForCourses(courses));
+	  		// Show a list of course meeting durations
+	  	for (Course element : courses) {
+	  		System.out.println(getTimeSequence(element));
+	  	}
+
 	    return courses;
 	}
 
@@ -516,8 +531,7 @@ public class UWregDAOImpl implements UWregDAO {
 	    	public Course mapRow(ResultSet myRs, int rowNum) throws SQLException {
 				
 				System.out.printf("Working on mapRow, TODO 5 \n");
-				
-			
+					
 				// Course
 				String courseCRN = myRs.getString("CRN");
 				System.out.printf("crn: %s \n", courseCRN);
@@ -545,8 +559,10 @@ public class UWregDAOImpl implements UWregDAO {
 				String courseRoom = myRs.getString("room");
 				System.out.printf("room: %s \n", courseRoom);
 								
-				// String courseInstructor= myRs.getString("");
-				String courseInstructor = "Gamboa";
+				// String courseInstructor= myRs.getString("");				
+				String courseInstructorLast = myRs.getString("lastname");
+				String courseInstructorFirst = myRs.getString("firstname");
+				String courseInstructor = courseInstructorLast + ", " + courseInstructorFirst;
 				String[] courseNotes = {"Note1", "Note2"};
 	    
 				
@@ -729,8 +745,171 @@ public class UWregDAOImpl implements UWregDAO {
     	// 10 points: Check that (new) schedule has at least 12 and at most 18 credit
     	//            hours, and that there are no time conflicts
 		// If something goes wrong (e.g., schedule fails sanity checks), throw a UWregDAOException
+		
+		// Keep track of the original enrollment
+		List<Course> originalSchedule = getCoursesRegistered(wnumber);
+		List<String> originalCRNs = getCRNsForCourses(originalSchedule);
+		
+		System.out.println("Working on TODO 8");
+		System.out.println(adds.size());
+		System.out.println(adds.get(0));
+		System.out.println(adds.get(0).isEmpty());
+		
+		System.out.println(drops.size()); // even when empty, size is still 1
+		System.out.println(drops.get(0)); //prints as \n when empty
+		System.out.println(drops.get(0).isEmpty()); // true when not dropping
+		System.out.println(!drops.get(0).isEmpty()); // false when not dropping
+		
+		// Add courses
+		if(!adds.get(0).isEmpty()){
+			for (String element : adds) {
+				 System.out.printf("Courses to add: %s \n", element);
+				 System.out.println(element);
+				// Add courses
+				 System.out.println("About to use jdbcTemplate ... ");
+				 jdbcTemplate.update("INSERT INTO coscuw.enrolledin (wNumber, CRN) VALUES (?, ?) ", wnumber, element );
+				
+			 }
+		}
+		
+		// Remove courses
+		if(!drops.get(0).isEmpty()){
+			for (String element : drops) {
+				 System.out.printf("Courses to remove: %s \n", element);
+				 System.out.println(element);
+				// Add courses
+				 System.out.println("About to use jdbcTemplate ... ");
+				 jdbcTemplate.update("DELETE FROM coscuw.enrolledin WHERE wNumber = ? AND CRN = ? LIMIT 1 ", wnumber, element );
+				
+			 }
+		}
+		
+		// Get the new schedule
+		List<Course> newSchedule = getCoursesRegistered(wnumber);
+		// Get the number of units for the new schedule
+		int totalUnits = getTotalUnits(newSchedule);
+		System.out.println("  ==-=-=-=-=-=-=- For the new schedule the unit total is: ==-=-=-=-=-=-=-  ");
+		System.out.println(totalUnits);
+		
+				 		
+		 
+		 
+		
 		throw new UWregDAOException("Not implemented");
 	}
+	
+	
+	
+	
+	public int getTotalUnits(List<Course> listOfCourses){
+		
+		int storedCredits = 0;
+		
+		for (Course element : listOfCourses) {
+			storedCredits = storedCredits + element.getCredits();
+		}
+		return storedCredits;
+	}
+	
+	public List<String> getCRNsForCourses(List<Course> listOfCourses){
+		
+		//int newCRN = 0;
+		//int [] storedCRNs;
+		List<String> storedCRNs = new ArrayList<String>();
+
+		
+		for (Course element : listOfCourses) {
+			//storedCredits = storedCredits + element.getCredits();
+			storedCRNs.add(element.getCrn());
+			
+		}
+		
+		return storedCRNs;
+	}
+	
+	List<Integer> makeIntSequence(int begin, int end) {
+		  List<Integer> timeSequence = new ArrayList(end - begin + 1);
+		  for(int i = begin; i <= end; i++, timeSequence.add(i));
+		  return timeSequence;  
+		}
+	
+	public List<Integer> getTimeSequence(Course newCourse){
+		
+		//for (Course element : listOfCourses) {
+		
+			String startingTime = "";
+	    	int startingPoint = 0;
+	    	
+	    	String endingTime = "";
+	    	int endingPoint = 0;
+	    	
+	    	List<Integer> course1Time = null;
+	    	
+	    	//-------------------------------------
+	        System.out.println(newCourse.getCrn());       
+	        System.out.println(newCourse.getDays());	        
+	        System.out.println(newCourse.getStart());
+	        System.out.println(newCourse.getStop()); 
+	        //-------------------------------------
+	        
+	        if (newCourse.getStart().length() == 7) {
+            	
+            	// Get the starting point
+            	System.out.println("Here is the starting point: ");
+            	startingTime = newCourse.getStart().substring(0, Math.min(0 + 2, newCourse.getStart().length()));
+            	startingPoint = Integer.parseInt(startingTime);
+            	System.out.println(startingPoint);
+            	
+            	// Get the ending point
+            	endingTime = newCourse.getStop().substring(0, Math.min(0 + 2, newCourse.getStop().length()));
+            	endingPoint = Integer.parseInt(endingTime);
+            	
+            	// "Round up" ?
+            	/*
+            	if(startingPoint == endingPoint) {
+            		endingPoint = endingPoint + 1;            		
+            	}
+            	*/
+            	
+            	// Use the starting and ending time to create a sequence
+            	//List<Integer> range1 = IntStream.rangeClosed(1, 10).boxed().collect(Collectors.toList());
+            	//course1Time = IntStream.rangeClosed(startingPoint, endingPoint).boxed().collect(Collectors.toList());
+            	//List<Integer> numbers = Stream.iterate(1, n -> n + 1).limit(10).collect(Collectors.toList());
+            	course1Time = makeIntSequence(startingPoint, endingPoint);              
+            	System.out.println("Here is the range of time:  ");
+            	System.out.println(course1Time);      
+            	
+            	return course1Time;
+            	
+            } else if (newCourse.getStart().length() == 6) {
+            	
+            	// Get the starting point
+            	startingTime = Character.toString(newCourse.getStart().charAt(0));
+            	startingPoint = Integer.parseInt(startingTime);
+            	
+            	// Get the ending point
+            	endingTime = Character.toString(newCourse.getStop().charAt(0));
+            	endingPoint = Integer.parseInt(endingTime);
+            	
+            	course1Time = makeIntSequence(startingPoint, endingPoint);              
+            	System.out.println("Here is the range of time:  ");
+            	System.out.println(course1Time);      
+            	
+            	return course1Time;
+            			
+            } else {
+            	//course1Time = IntStream.rangeClosed(98, 99).boxed().collect(Collectors.toList());
+            	course1Time = makeIntSequence(98, 99);              
+            	System.out.println("Here is the range of time:  ");
+            	System.out.println(course1Time);      
+            	
+            	return course1Time;
+            }
+        
+		
+		//return null;
+	}
+	
 	
 	//Better name: condenseCourseSchedule
 	public List<Course> condenseCourseSchedule(List<Course> listOfCourses){
@@ -799,41 +978,58 @@ public class UWregDAOImpl implements UWregDAO {
             System.out.println(currentNotes[1]);
             
             // (1 of 7) Ignore (consecutive) duplicates
+            /*
             if( (currentCRN.equals(previousCRN)) && (currentDays.equals(previousDay)) ) {
             	System.out.println("Duplicate course found");
             	
             // (2 of 7) A repeated CRN, with more CRNs to come
             } else if( (currentCRN.equals(previousCRN)) && (loopCounter != listOfCourses.size())) {
+            */
+            
+            if( (currentCRN.equals(previousCRN)) && (loopCounter != listOfCourses.size())) {
                 System.out.println("SAME course found");
-
-                //Since the CRN has not changed, combine the notes
-                for(int i=0; i < currentNotes.length; i++){
-                    tempNotesArray.add(currentNotes[i]);
+                
+                if (storedDays.contains(currentDays)) {
+                	System.out.println("*** REPEATED DAY ***");
                 }
                 
-                //Since the CRN has not changed, combine the days
-                storedDays = storedDays + currentDays;
-                System.out.println("Here are the storedDays UPDATED");
-                System.out.println(storedDays);
+                // Ignore info if the day has already been seen for this course
+                if (!storedDays.contains(currentDays)) {                	
+                	//Since the CRN has not changed, combine the notes
+                    for(int i=0; i < currentNotes.length; i++){
+                        tempNotesArray.add(currentNotes[i]);
+                    }
+                    
+                    //Since the CRN has not changed, combine the days
+                    storedDays = storedDays + currentDays;
+                    System.out.println("Here are the storedDays UPDATED");
+                    System.out.println(storedDays);
+                    
+                    //Keep track of the single, most recent day for comparison
+                    previousDay = currentDays;
+                    System.out.println("Here is previousDay UPDATED");
+                    System.out.println(previousDay);
+                }
+
                 
-                //Keep track of the single, most recent day for comparison
-                previousDay = currentDays;
-                System.out.println("Here is previousDay UPDATED");
-                System.out.println(previousDay);
                 
 
             // (3 of 7) A repeated CRN, with no more CRNs to check
             } else if ((currentCRN.equals(previousCRN)) && (loopCounter == listOfCourses.size())){ 
             	
-            	//Since the CRN has not changed, combine the notes
-                for(int i=0; i < currentNotes.length; i++){
-                    tempNotesArray.add(currentNotes[i]);
-                }
-                
-                //Since the CRN has not changed, combine the days
-                storedDays = storedDays + currentDays;
-                System.out.println("Here are the storedDays UPDATED");
-                System.out.println(storedDays);                                            
+            	if (!storedDays.contains(currentDays)) { 
+            		
+            		//Since the CRN has not changed, combine the notes
+                    for(int i=0; i < currentNotes.length; i++){
+                        tempNotesArray.add(currentNotes[i]);
+                    }
+                    
+                    //Since the CRN has not changed, combine the days
+                    storedDays = storedDays + currentDays;
+                    System.out.println("Here are the storedDays UPDATED");
+                    System.out.println(storedDays);             	
+            	}
+            	                                           
                 
                 // Create a Course object 
                 //String completeDays = "";
