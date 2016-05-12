@@ -168,7 +168,7 @@ public class UWregDAOImpl implements UWregDAO {
 	    	
 			public Course mapRow(ResultSet myRs, int rowNum) throws SQLException {
 				
-				System.out.printf("Working on mapRow, TODO 4 \n");
+				System.out.printf("Working on mapRow, TODO 4 \n");				
 								
 				// Course
 				String courseCRN = myRs.getString("CRN");
@@ -222,6 +222,10 @@ public class UWregDAOImpl implements UWregDAO {
 	    
 	 // Combine notes from the same CRN into a single Course object ---------------------------------------------
 	 // ---------------------------------------------------------------------------------------------------------
+	    
+	    //danielsFunction(listOfCourses);
+	    
+	    /*
         System.out.println(" === COMBINING COURSES === \n");
         String previousCRN = "x123";
         String previousDay = "";
@@ -470,10 +474,17 @@ public class UWregDAOImpl implements UWregDAO {
             
         } // end for loop
    	 // ---------------------------------------------------------------------------------------------------------
+   	  */
 	    
 
-        //RETURN A LIST OF COURSES WITH NOTES AND DAYS COMBINED -- AND DUPLICATES ELIMINATED	    
-        courses = finalList;
+	    // Deprecated
+        //courses = finalList;
+        //finalList.clear();
+	    
+	    
+	    
+	  //RETURN A LIST OF COURSES WITH NOTES AND DAYS COMBINED -- AND DUPLICATES ELIMINATED
+        courses = condenseCourseSchedule(listOfCourses);
 	    return courses;
 	}
 
@@ -543,7 +554,7 @@ public class UWregDAOImpl implements UWregDAO {
 				
 				
 				Course course = new Course(courseCRN, courseUSP, courseSubject, courseNumber, courseSection, courseTitle, courseCredits, courseDay, courseStart, courseStop, courseBuilding, courseRoom, courseInstructor, courseNotes);				
-
+				
 				return course;
 				
 			}
@@ -552,7 +563,8 @@ public class UWregDAOImpl implements UWregDAO {
 	    
 	    
 	    
-	    courses = listOfCourses;
+	    //courses = listOfCourses;
+	    courses = condenseCourseSchedule(listOfCourses);
 		return courses;
 	}
 	
@@ -578,6 +590,264 @@ public class UWregDAOImpl implements UWregDAO {
     	//            hours, and that there are no time conflicts
 		// If something goes wrong (e.g., schedule fails sanity checks), throw a UWregDAOException
 		throw new UWregDAOException("Not implemented");
+	}
+	
+	//Better name: condenseCourseSchedule
+	public List<Course> condenseCourseSchedule(List<Course> listOfCourses){
+	//public void danielsFunction(List<Course> listOfCourses){
+		
+		System.out.printf("\n\n");
+		System.out.println("Hello, Daniel");
+		System.out.println("**********************  condenseCourseSchedule **********  ");
+		
+		System.out.println(" === COMBINING COURSES === \n");
+        String previousCRN = "x123";
+        String previousDay = "";
+      //-------------------------------------
+        String storedSubject = "";
+        String storedUsp = "";
+        String storedCNumber = "";
+        String storedSection = "";
+        String storedTitle = "";
+        int storedCredits = 0;
+        
+        String storedDays = "";
+        
+        String storedStart = "";
+        String storedStop = ""; 
+        String storedBuilding = "";
+        String storedRoom = "";
+        
+        String storedInstructor = "";
+      //-------------------------------------
+        
+        ArrayList<String> tempNotesArray = new ArrayList<String>();
+        List<Course> finalList = new ArrayList<Course>();
+        
+        int loopCounter = 0;
+        
+        for (Course element : listOfCourses) {
+
+            String currentCRN = null;
+            String currentDays = null;
+            String[] currentNotes = null;
+            
+            loopCounter++ ;
+            System.out.println("\n\nWhat's the count?");
+            System.out.println(loopCounter);
+            
+            // Get the current CRN info
+            currentCRN = element.getCrn();
+            System.out.println("The CRN is: ");
+            System.out.println(currentCRN);
+            System.out.println("The previousCRN is ");
+            System.out.println(previousCRN);
+            System.out.println("Do the CRNs match?");
+            System.out.println(currentCRN.equals(previousCRN));
+            // Get the current days info
+            currentDays = element.getDays();
+            System.out.println("Here are the days");
+            System.out.println(currentDays);
+            System.out.println("previousDays is ");
+            System.out.println(previousDay);
+            // Get the current info
+            currentNotes = element.getNotes();
+            System.out.println("The number of notes is:");
+            System.out.println(currentNotes.length);
+            System.out.println("The notes are:");
+            System.out.println(currentNotes[0]);
+            System.out.println(currentNotes[1]);
+            
+            // (1 of 7) Ignore (consecutive) duplicates
+            if( (currentCRN.equals(previousCRN)) && (currentDays.equals(previousDay)) ) {
+            	System.out.println("Duplicate course found");
+            	
+            // (2 of 7) A repeated CRN, with more CRNs to come
+            } else if( (currentCRN.equals(previousCRN)) && (loopCounter != listOfCourses.size())) {
+                System.out.println("SAME course found");
+
+                //Since the CRN has not changed, combine the notes
+                for(int i=0; i < currentNotes.length; i++){
+                    tempNotesArray.add(currentNotes[i]);
+                }
+                
+                //Since the CRN has not changed, combine the days
+                storedDays = storedDays + currentDays;
+                System.out.println("Here are the storedDays UPDATED");
+                System.out.println(storedDays);
+                
+                //Keep track of the single, most recent day for comparison
+                previousDay = currentDays;
+                System.out.println("Here is previousDay UPDATED");
+                System.out.println(previousDay);
+                
+
+            // (3 of 7) A repeated CRN, with no more CRNs to check
+            } else if ((currentCRN.equals(previousCRN)) && (loopCounter == listOfCourses.size())){ 
+            	
+            	//Since the CRN has not changed, combine the notes
+                for(int i=0; i < currentNotes.length; i++){
+                    tempNotesArray.add(currentNotes[i]);
+                }
+                
+                //Since the CRN has not changed, combine the days
+                storedDays = storedDays + currentDays;
+                System.out.println("Here are the storedDays UPDATED");
+                System.out.println(storedDays);                                            
+                
+                // Create a Course object 
+                //String completeDays = "";
+                //completeDays = storedDays;
+                
+                String[] completeNotes = new String[tempNotesArray.size()];
+                completeNotes = tempNotesArray.toArray(completeNotes);
+                
+                Course completeCourse = new Course(previousCRN, storedUsp, storedSubject, storedCNumber, storedSection, storedTitle, storedCredits, storedDays, storedStart, storedStop, storedBuilding, storedRoom, storedInstructor, completeNotes);
+                finalList.add(completeCourse);
+                
+            // (4 of 7) The last CRN is being read in and it's not also the first (and not a repeat)
+            } else if(loopCounter == listOfCourses.size() && ( !previousCRN.equals("x123") )) {
+
+                System.out.println("This is the last shot \n");
+
+                //Create an object for the previous course
+                //String completeDays = "";
+                //completeDays = previousDay;
+                
+                String[] completeNotes = new String[tempNotesArray.size()];
+                completeNotes = tempNotesArray.toArray(completeNotes);
+                
+                Course completeCourse = new Course(previousCRN, storedUsp, storedSubject, storedCNumber, storedSection, storedTitle, storedCredits, storedDays, storedStart, storedStop, storedBuilding, storedRoom, storedInstructor, completeNotes);
+                finalList.add(completeCourse);
+                
+                
+                // Create an object for the new course
+                //-------------------------------------
+                storedSubject = element.getSubject();
+                storedUsp = element.getUsp();
+                storedCNumber = element.getCnumber();
+                storedSection = element.getSection();
+                storedTitle = element.getTitle();
+                storedCredits = element.getCredits();
+                
+                storedStart = element.getStart();
+                storedStop = element.getStop(); 
+                storedBuilding = element.getBuilding();
+                storedRoom = element.getRoom();
+                
+                storedInstructor = element.getInstructor();
+                //-------------------------------------
+                Course lastCourse = new Course(currentCRN, storedUsp, storedSubject, storedCNumber, storedSection, storedTitle, storedCredits, currentDays, storedStart, storedStop, storedBuilding, storedRoom, storedInstructor, currentNotes);
+                finalList.add(lastCourse);
+
+            // (5 of 7) There first CRN is being read and there are more to come
+            } else if( (previousCRN.equals("x123")) && (loopCounter != listOfCourses.size()) ) {
+
+                System.out.println("This is the first course \n");
+                previousCRN = currentCRN;
+                System.out.println("previousCRN has been updated to: ");
+                System.out.println(previousCRN);
+                
+                //Save the notes and days
+                for(int i=0; i < currentNotes.length; i++){
+                    tempNotesArray.add(currentNotes[i]);
+                }
+                storedDays = currentDays;
+                      
+                // Save other course info
+                //-------------------------------------
+                storedSubject = element.getSubject();
+                storedUsp = element.getUsp();
+                storedCNumber = element.getCnumber();
+                storedSection = element.getSection();
+                storedTitle = element.getTitle();
+                storedCredits = element.getCredits();
+                
+                storedStart = element.getStart();
+                storedStop = element.getStop(); 
+                storedBuilding = element.getBuilding();
+                storedRoom = element.getRoom();
+                
+                storedInstructor = element.getInstructor();
+                //-------------------------------------
+                
+                //Update the previous day
+                previousDay = currentDays;
+                
+
+            // (6 of 7) There is only one CRN
+            } else if ( (previousCRN.equals("x123")) && (loopCounter == listOfCourses.size()) ) { 
+                
+                // Create an object for for this one course
+            	//-------------------------------------
+                storedSubject = element.getSubject();
+                storedUsp = element.getUsp();
+                storedCNumber = element.getCnumber();
+                storedSection = element.getSection();
+                storedTitle = element.getTitle();
+                storedCredits = element.getCredits();
+                
+                storedStart = element.getStart();
+                storedStop = element.getStop(); 
+                storedBuilding = element.getBuilding();
+                storedRoom = element.getRoom();
+                
+                storedInstructor = element.getInstructor();
+                //-------------------------------------
+                Course lastCourse = new Course(currentCRN, storedUsp, storedSubject, storedCNumber, storedSection, storedTitle, storedCredits, currentDays, storedStart, storedStop, storedBuilding, storedRoom, storedInstructor, currentNotes);
+                finalList.add(lastCourse);
+            	
+            	
+            // (7 of 7) A new CRN has been read (it's not the first) and there are more to come
+            } else {
+                System.out.println("new course found");
+                // Create a Course object for the old course
+                //String completeDays = "";
+                //completeDays = previousDay;
+                
+                String[] completeNotes = new String[tempNotesArray.size()];
+                completeNotes = tempNotesArray.toArray(completeNotes);
+
+                Course completeCourse = new Course(previousCRN, storedUsp, storedSubject, storedCNumber, storedSection, storedTitle, storedCredits, storedDays, storedStart, storedStop, storedBuilding, storedRoom, storedInstructor, completeNotes);
+                finalList.add(completeCourse);
+                //System.out.println(finalList.size());
+
+                // Save the (new) CRN, days, and notes
+                previousCRN = currentCRN;
+                previousDay = currentDays;
+                System.out.println("Here are the days UPDATED");
+                System.out.println(previousDay);                
+                tempNotesArray.clear();
+                for(int i=0; i < currentNotes.length; i++){
+                    tempNotesArray.add(currentNotes[i]);
+                }
+                
+                storedDays = currentDays;
+                
+                // Save other (new) course info
+                //-------------------------------------
+                storedSubject = element.getSubject();
+                storedUsp = element.getUsp();
+                storedCNumber = element.getCnumber();
+                storedSection = element.getSection();
+                storedTitle = element.getTitle();
+                storedCredits = element.getCredits();
+                
+                storedStart = element.getStart();
+                storedStop = element.getStop(); 
+                storedBuilding = element.getBuilding();
+                storedRoom = element.getRoom();
+                
+                storedInstructor = element.getInstructor();
+                //-------------------------------------
+                
+            }
+            
+            
+            
+        } // end of listOfCourses for loop
+		
+		return finalList;
 	}
 
 }
