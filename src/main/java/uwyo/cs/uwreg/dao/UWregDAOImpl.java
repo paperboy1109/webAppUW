@@ -435,7 +435,11 @@ public class UWregDAOImpl implements UWregDAO {
 								
 				// String courseInstructor= myRs.getString("");
 				String courseInstructor = "Gamboa";
-				String[] courseNotes = {"Note1", "Note2"};
+				//String[] courseNotes = {"Note1", "Note2"};
+				String courseNote = myRs.getString("note"); //{"Note1", "Note2"};
+				ArrayList<String> tempNotesArray1 = new ArrayList<String>();
+				tempNotesArray1.add(courseNote);
+				String[] courseNotes = tempNotesArray1.toArray(new String[0]);
 	    
 				
 				

@@ -59,7 +59,7 @@ public class SpringSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		
         auth.jdbcAuthentication().dataSource(dataSource)
         	//.usersByUsernameQuery("SELECT username, password, enabled from login where username=?")
-        	.usersByUsernameQuery("SELECT wNumber AS username, lastname AS password, COUNT(*) AS enabled FROM coscuw.students where wNumber=?")
+        	.usersByUsernameQuery("SELECT wNumber AS username, lastname AS password, IF(count(*)=1, 1, 0) AS enabled FROM coscuw.students where wNumber=?")
         	//.authoritiesByUsernameQuery("select username, role from groups where username=?");
         	.authoritiesByUsernameQuery("SELECT wNumber AS username, IF(count(*)=1, 'ROLE_STUDENT', 'ROLE_UNKNOWN') AS role from coscuw.students where wNumber=?");
     }
