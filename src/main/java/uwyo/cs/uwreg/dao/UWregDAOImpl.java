@@ -29,46 +29,18 @@ public class UWregDAOImpl implements UWregDAO {
 	@Override
 	public Student getStudentByWnumber(String wnumber) {
     	// TODO 3 (10 pts) - Get the record of student with given wnumber
-	    
-		
-		// careful ..
-		//Student student = null;
-		
-		// Using Spring
-		// setString(1, "w87501680"), myStmt
-		
-		// This one works but doesn't take the w-number into account
-		//List<Student> listOfStudents = jdbcTemplate.query("select * from coscuw.students LIMIT 10", new RowMapper<Student>() {
+
 			
 		List<Student> listOfStudents = jdbcTemplate.query("select * from coscuw.students WHERE wNumber = ?", new Object[] { wnumber }, new RowMapper<Student>() {
 		
-/*		List<Student> listOfStudents = jdbcTemplate.query("select * from coscuw.students WHERE wNumber = ?", 
-				new PreparedStatementSetter() {
-            	public void setValues(PreparedStatement preparedStatement) throws
-            		SQLException {
-            			preparedStatement.setString(1, wnumber);
-            		}
-			}, new RowMapper<Student>() {*/
-
-
 			public Student mapRow(ResultSet myRs, int rowNum) throws SQLException {
-				
-				// Example code
-				//Offer offer = new Offer();
-				//offer.setId(myRs.getInt("id"));
-				//offer.setName(myRs.getString("name"));
-				//offer.setText(myRs.getString("text"));
-				//offer.setEmail(myRs.getString("email"));
-				//return offer;
+								
 				
 				// Student
 				String studentWNum = myRs.getString("wNumber");
 				String studentLastName = myRs.getString("lastname");
 				String studentFirstName = myRs.getString("firstname");
-				String studentGender = myRs.getString("gender");
-				
-				//For debugging purposes:
-				System.out.printf("%s, %s, %s, %s\n", studentWNum, studentLastName, studentFirstName, studentGender);
+				String studentGender = myRs.getString("gender");												
 				
 				Student student = new Student(studentWNum, studentFirstName, studentLastName, studentGender);
 				return student;
@@ -140,9 +112,7 @@ public class UWregDAOImpl implements UWregDAO {
 		}*/
 	    
 	    
-		
-	    // careful ...
-		//return student;
+
 		return listOfStudents.get(0);
     }
 
@@ -155,7 +125,8 @@ public class UWregDAOImpl implements UWregDAO {
 	    List<Course> listOfCourses = jdbcTemplate.query("SELECT enrolledin.CRN, coursedetails.usp, offeringof.subject, " +
 	    												"offeringof.number, scheduledcourses.section, offeringof.title, " +
 	    												"courses.credits, coursemeetings.days, coursemeetings.start, coursemeetings.stop, " +
-	    												"coursemeetings.bldg, coursemeetings.room " +
+	    												"coursemeetings.bldg, coursemeetings.room, instructors.lastname, instructors.firstname, " +
+	    												"coursenotes.note " +
 	    												"FROM coscuw.enrolledin " +
 	    												"JOIN coscuw.offeringof ON enrolledin.CRN = offeringof.CRN " +
 	    												"JOIN coscuw.coursemeetings ON enrolledin.CRN = coursemeetings.crn " +
@@ -164,6 +135,9 @@ public class UWregDAOImpl implements UWregDAO {
 	    												"JOIN coscuw.courses ON offeringof.subject=courses.subject " +
 	    													"AND offeringof.number=courses.number " +
 	    													"AND offeringof.title = courses.title " +
+	    												"LEFT JOIN coscuw.coursenotes ON enrolledin.CRN = coursenotes.CRN " +
+	    												"JOIN coscuw.instructorfor ON enrolledin.CRN = instructorfor.CRN " +
+	    												"JOIN coscuw.instructors ON instructorfor.id = instructors.id " + 
 	    												"WHERE wNumber = ? "
 	    , 
 	    new Object[] { wnumber }, new RowMapper<Course>() {
@@ -176,321 +150,52 @@ public class UWregDAOImpl implements UWregDAO {
 				String courseCRN = myRs.getString("CRN");
 				System.out.printf("crn: %s \n", courseCRN);
 				String courseUSP = myRs.getString("usp");
-				System.out.printf("usp: %s \n", courseUSP);
+				//System.out.printf("usp: %s \n", courseUSP);
 				String courseSubject = myRs.getString("subject");
-				System.out.printf("subject: %s \n", courseSubject);
+				//System.out.printf("subject: %s \n", courseSubject);
 				String courseNumber = myRs.getString("number");
-				System.out.printf("number: %s \n", courseNumber);
+				//System.out.printf("number: %s \n", courseNumber);
 				String courseSection = myRs.getString("section");
-				System.out.printf("section: %s \n", courseSection);
+				//System.out.printf("section: %s \n", courseSection);
 				String courseTitle = myRs.getString("title");
 				
-				// String courseCredits= myRs.getString(""); 
-				//int courseCredits = 1;
 				int courseCredits = myRs.getInt("credits");
-				System.out.printf("credits: %d \n", courseCredits);
+				//System.out.printf("credits: %d \n", courseCredits);
 				
 				String courseDay = myRs.getString("days");
-				System.out.printf("days: %s \n", courseDay);
+				//System.out.printf("days: %s \n", courseDay);
 				String courseStart = myRs.getString("start");
-				System.out.printf("start: %s \n", courseStart);
+				//System.out.printf("start: %s \n", courseStart);
 				String courseStop = myRs.getString("stop");
-				System.out.printf("stop: %s \n", courseStop);
+				//System.out.printf("stop: %s \n", courseStop);
 				String courseBuilding = myRs.getString("bldg");
-				System.out.printf("bldg: %s \n", courseBuilding);
+				//System.out.printf("bldg: %s \n", courseBuilding);
 				String courseRoom = myRs.getString("room");
-				System.out.printf("room: %s \n", courseRoom);
+				//System.out.printf("room: %s \n", courseRoom);
+												
+				//String courseInstructor = "Gamboa";
+				String courseInstructorLast = myRs.getString("lastname");
+				String courseInstructorFirst = myRs.getString("firstname");
+				String courseInstructor = courseInstructorLast + ", " + courseInstructorFirst;
+				//String[] courseNotes = {"Note1", "Note2"};
+				String courseNote = myRs.getString("note"); //{"Note1", "Note2"};
+				ArrayList<String> tempNotesArray1 = new ArrayList<String>();
+				tempNotesArray1.add(courseNote);
+				String[] courseNotes = tempNotesArray1.toArray(new String[0]);
+				
 								
-				// String courseInstructor= myRs.getString("");
-				String courseInstructor = "Gamboa";
-				//String courseInstructorLast = myRs.getString("lastname");
-				//String courseInstructorFirst = myRs.getString("firstname");
-				//String courseInstructor = courseInstructorLast + ", " + courseInstructorFirst;
-				String[] courseNotes = {"Note1", "Note2"};
-		
-				
-				//For debugging purposes:
-				//System.out.printf("%s, %s, %s, %s\n", studentWNum, studentLastName, studentFirstName, studentGender);
-				
-				// Student student = new Student(studentWNum, studentFirstName, studentLastName, studentGender);
 				Course course = new Course(courseCRN, courseUSP, courseSubject, courseNumber, courseSection, courseTitle, courseCredits, courseDay, courseStart, courseStop, courseBuilding, courseRoom, courseInstructor, courseNotes);
-				//Course course = new Course(courseCRN, courseUSP, courseSubject, courseNumber, courseSection, courseTitle, courseCredits, courseDay, courseStart, courseStop, courseBuilding, courseRoom, courseInstructor, courseNotes);
-
-				
-				//return student;
+									
 				return course;
 				
 			}
 	    
 	    });
 
-	    
-	 // Combine notes from the same CRN into a single Course object ---------------------------------------------
-	 // ---------------------------------------------------------------------------------------------------------
-	    
-	    //danielsFunction(listOfCourses);
-	    
-	    /*
-        System.out.println(" === COMBINING COURSES === \n");
-        String previousCRN = "x123";
-        String previousDay = "";
-      //-------------------------------------
-        String storedSubject = "";
-        String storedUsp = "";
-        String storedCNumber = "";
-        String storedSection = "";
-        String storedTitle = "";
-        int storedCredits = 0;
-        
-        String storedDays = "";
-        
-        String storedStart = "";
-        String storedStop = ""; 
-        String storedBuilding = "";
-        String storedRoom = "";
-        
-        String storedInstructor = "";
-      //-------------------------------------
-        
-        ArrayList<String> tempNotesArray = new ArrayList<String>();
-        List<Course> finalList = new ArrayList<Course>();
-        
-        int loopCounter = 0;
-        
-        // Loop through the courses that were returned from the ResultSet
-        for (Course element : listOfCourses) {
 
-            String currentCRN = null;
-            String currentDays = null;
-            String[] currentNotes = null;
-            
-            loopCounter++ ;
-            System.out.println("\n\nWhat's the count?");
-            System.out.println(loopCounter);
-            
-            // Get the current CRN info
-            currentCRN = element.getCrn();
-            System.out.println("The CRN is: ");
-            System.out.println(currentCRN);
-            System.out.println("The previousCRN is ");
-            System.out.println(previousCRN);
-            System.out.println("Do the CRNs match?");
-            System.out.println(currentCRN.equals(previousCRN));
-            // Get the current days info
-            currentDays = element.getDays();
-            System.out.println("Here are the days");
-            System.out.println(currentDays);
-            System.out.println("previousDays is ");
-            System.out.println(previousDay);
-            // Get the current info
-            currentNotes = element.getNotes();
-            System.out.println("The number of notes is:");
-            System.out.println(currentNotes.length);
-            System.out.println("The notes are:");
-            System.out.println(currentNotes[0]);
-            System.out.println(currentNotes[1]);
-            
-            // (1 of 7) Ignore (consecutive) duplicates
-            if( (currentCRN.equals(previousCRN)) && (currentDays.equals(previousDay)) ) {
-            	System.out.println("Duplicate course found");
-            	
-            // (2 of 7) A repeated CRN, with more CRNs to come
-            } else if( (currentCRN.equals(previousCRN)) && (loopCounter != listOfCourses.size())) {
-                System.out.println("SAME course found");
-
-                //Since the CRN has not changed, combine the notes
-                for(int i=0; i < currentNotes.length; i++){
-                    tempNotesArray.add(currentNotes[i]);
-                }
-                
-                //Since the CRN has not changed, combine the days
-                storedDays = storedDays + currentDays;
-                System.out.println("Here are the storedDays UPDATED");
-                System.out.println(storedDays);
-                
-                //Keep track of the single, most recent day for comparison
-                previousDay = currentDays;
-                System.out.println("Here is previousDay UPDATED");
-                System.out.println(previousDay);
-                
-
-            // (3 of 7) A repeated CRN, with no more CRNs to check
-            } else if ((currentCRN.equals(previousCRN)) && (loopCounter == listOfCourses.size())){ 
-            	
-            	//Since the CRN has not changed, combine the notes
-                for(int i=0; i < currentNotes.length; i++){
-                    tempNotesArray.add(currentNotes[i]);
-                }
-                
-                //Since the CRN has not changed, combine the days
-                storedDays = storedDays + currentDays;
-                System.out.println("Here are the storedDays UPDATED");
-                System.out.println(storedDays);                                            
-                
-                // Create a Course object 
-                //String completeDays = "";
-                //completeDays = storedDays;
-                
-                String[] completeNotes = new String[tempNotesArray.size()];
-                completeNotes = tempNotesArray.toArray(completeNotes);
-                
-                Course completeCourse = new Course(previousCRN, storedUsp, storedSubject, storedCNumber, storedSection, storedTitle, storedCredits, storedDays, storedStart, storedStop, storedBuilding, storedRoom, storedInstructor, completeNotes);
-                finalList.add(completeCourse);
-                
-            // (4 of 7) The last CRN is being read in and it's not also the first (and not a repeat)
-            } else if(loopCounter == listOfCourses.size() && ( !previousCRN.equals("x123") )) {
-
-                System.out.println("This is the last shot \n");
-
-                //Create an object for the previous course
-                //String completeDays = "";
-                //completeDays = previousDay;
-                
-                String[] completeNotes = new String[tempNotesArray.size()];
-                completeNotes = tempNotesArray.toArray(completeNotes);
-                
-                Course completeCourse = new Course(previousCRN, storedUsp, storedSubject, storedCNumber, storedSection, storedTitle, storedCredits, storedDays, storedStart, storedStop, storedBuilding, storedRoom, storedInstructor, completeNotes);
-                finalList.add(completeCourse);
-                
-                
-                // Create an object for the new course
-                //-------------------------------------
-                storedSubject = element.getSubject();
-                storedUsp = element.getUsp();
-                storedCNumber = element.getCnumber();
-                storedSection = element.getSection();
-                storedTitle = element.getTitle();
-                storedCredits = element.getCredits();
-                
-                storedStart = element.getStart();
-                storedStop = element.getStop(); 
-                storedBuilding = element.getBuilding();
-                storedRoom = element.getRoom();
-                
-                storedInstructor = element.getInstructor();
-                //-------------------------------------
-                Course lastCourse = new Course(currentCRN, storedUsp, storedSubject, storedCNumber, storedSection, storedTitle, storedCredits, currentDays, storedStart, storedStop, storedBuilding, storedRoom, storedInstructor, currentNotes);
-                finalList.add(lastCourse);
-
-            // (5 of 7) There first CRN is being read and there are more to come
-            } else if( (previousCRN.equals("x123")) && (loopCounter != listOfCourses.size()) ) {
-
-                System.out.println("This is the first course \n");
-                previousCRN = currentCRN;
-                System.out.println("previousCRN has been updated to: ");
-                System.out.println(previousCRN);
-                
-                //Save the notes and days
-                for(int i=0; i < currentNotes.length; i++){
-                    tempNotesArray.add(currentNotes[i]);
-                }
-                storedDays = currentDays;
-                      
-                // Save other course info
-                //-------------------------------------
-                storedSubject = element.getSubject();
-                storedUsp = element.getUsp();
-                storedCNumber = element.getCnumber();
-                storedSection = element.getSection();
-                storedTitle = element.getTitle();
-                storedCredits = element.getCredits();
-                
-                storedStart = element.getStart();
-                storedStop = element.getStop(); 
-                storedBuilding = element.getBuilding();
-                storedRoom = element.getRoom();
-                
-                storedInstructor = element.getInstructor();
-                //-------------------------------------
-                
-                //Update the previous day
-                previousDay = currentDays;
-                
-
-            // (6 of 7) There is only one CRN
-            } else if ( (previousCRN.equals("x123")) && (loopCounter == listOfCourses.size()) ) { 
-                
-                // Create an object for for this one course
-            	//-------------------------------------
-                storedSubject = element.getSubject();
-                storedUsp = element.getUsp();
-                storedCNumber = element.getCnumber();
-                storedSection = element.getSection();
-                storedTitle = element.getTitle();
-                storedCredits = element.getCredits();
-                
-                storedStart = element.getStart();
-                storedStop = element.getStop(); 
-                storedBuilding = element.getBuilding();
-                storedRoom = element.getRoom();
-                
-                storedInstructor = element.getInstructor();
-                //-------------------------------------
-                Course lastCourse = new Course(currentCRN, storedUsp, storedSubject, storedCNumber, storedSection, storedTitle, storedCredits, currentDays, storedStart, storedStop, storedBuilding, storedRoom, storedInstructor, currentNotes);
-                finalList.add(lastCourse);
-            	
-            	
-            // (7 of 7) A new CRN has been read (it's not the first) and there are more to come
-            } else {
-                System.out.println("new course found");
-                // Create a Course object for the old course
-                //String completeDays = "";
-                //completeDays = previousDay;
-                
-                String[] completeNotes = new String[tempNotesArray.size()];
-                completeNotes = tempNotesArray.toArray(completeNotes);
-
-                Course completeCourse = new Course(previousCRN, storedUsp, storedSubject, storedCNumber, storedSection, storedTitle, storedCredits, storedDays, storedStart, storedStop, storedBuilding, storedRoom, storedInstructor, completeNotes);
-                finalList.add(completeCourse);
-                //System.out.println(finalList.size());
-
-                // Save the (new) CRN, days, and notes
-                previousCRN = currentCRN;
-                previousDay = currentDays;
-                System.out.println("Here are the days UPDATED");
-                System.out.println(previousDay);                
-                tempNotesArray.clear();
-                for(int i=0; i < currentNotes.length; i++){
-                    tempNotesArray.add(currentNotes[i]);
-                }
-                
-                storedDays = currentDays;
-                
-                // Save other (new) course info
-                //-------------------------------------
-                storedSubject = element.getSubject();
-                storedUsp = element.getUsp();
-                storedCNumber = element.getCnumber();
-                storedSection = element.getSection();
-                storedTitle = element.getTitle();
-                storedCredits = element.getCredits();
-                
-                storedStart = element.getStart();
-                storedStop = element.getStop(); 
-                storedBuilding = element.getBuilding();
-                storedRoom = element.getRoom();
-                
-                storedInstructor = element.getInstructor();
-                //-------------------------------------
-                
-            }
-            
-            
-            
-        } // end for loop
-   	 // ---------------------------------------------------------------------------------------------------------
-   	  */
-	    
-
-	    // Deprecated
-        //courses = finalList;
-        //finalList.clear();
-	    
 	    	  
-	    
-	  //RETURN A LIST OF COURSES WITH NOTES AND DAYS COMBINED -- AND DUPLICATES ELIMINATED
-        courses = condenseCourseSchedule(listOfCourses);
         	// Is the student full time?
+	    /*
   	  	System.out.printf("The total number of units in this schedule is:  ");
   	  	System.out.println(getTotalUnits(courses));
   	  	System.out.printf("The CRNs are:  ");
@@ -499,7 +204,10 @@ public class UWregDAOImpl implements UWregDAO {
 	  	for (Course element : courses) {
 	  		System.out.println(getTimeSequence(element));
 	  	}
+	  	*/
 
+	  	//RETURN A LIST OF COURSES WITH NOTES AND DAYS COMBINED -- AND DUPLICATES ELIMINATED
+        courses = condenseCourseSchedule(listOfCourses);
 	    return courses;
 	}
 
@@ -536,34 +244,38 @@ public class UWregDAOImpl implements UWregDAO {
 				String courseCRN = myRs.getString("CRN");
 				System.out.printf("crn: %s \n", courseCRN);
 				String courseUSP = myRs.getString("usp");
-				System.out.printf("usp: %s \n", courseUSP);
+				//System.out.printf("usp: %s \n", courseUSP);
 				String courseSubject = myRs.getString("subject");
-				System.out.printf("subject: %s \n", courseSubject);
+				//System.out.printf("subject: %s \n", courseSubject);
 				String courseNumber = myRs.getString("number");
-				System.out.printf("number: %s \n", courseNumber);
+				//System.out.printf("number: %s \n", courseNumber);
 				String courseSection = myRs.getString("section");
-				System.out.printf("section: %s \n", courseSection);
+				//System.out.printf("section: %s \n", courseSection);
 				String courseTitle = myRs.getString("title");
 				
 				int courseCredits = myRs.getInt("credits");
-				System.out.printf("credits: %d \n", courseCredits);
+				//System.out.printf("credits: %d \n", courseCredits);
 				
 				String courseDay = myRs.getString("days");
-				System.out.printf("days: %s \n", courseDay);
+				//System.out.printf("days: %s \n", courseDay);
 				String courseStart = myRs.getString("start");
-				System.out.printf("start: %s \n", courseStart);
+				//System.out.printf("start: %s \n", courseStart);
 				String courseStop = myRs.getString("stop");
-				System.out.printf("stop: %s \n", courseStop);
+				//System.out.printf("stop: %s \n", courseStop);
 				String courseBuilding = myRs.getString("bldg");
-				System.out.printf("bldg: %s \n", courseBuilding);
+				//System.out.printf("bldg: %s \n", courseBuilding);
 				String courseRoom = myRs.getString("room");
-				System.out.printf("room: %s \n", courseRoom);
+				//System.out.printf("room: %s \n", courseRoom);
 								
 				// String courseInstructor= myRs.getString("");				
 				String courseInstructorLast = myRs.getString("lastname");
 				String courseInstructorFirst = myRs.getString("firstname");
 				String courseInstructor = courseInstructorLast + ", " + courseInstructorFirst;
-				String[] courseNotes = {"Note1", "Note2"};
+				//String[] courseNotes = {"Note1", "Note2"};
+				String courseNote = myRs.getString("note"); //{"Note1", "Note2"};
+				ArrayList<String> tempNotesArray1 = new ArrayList<String>();
+				tempNotesArray1.add(courseNote);
+				String[] courseNotes = tempNotesArray1.toArray(new String[0]);
 	    
 				
 				
@@ -618,32 +330,36 @@ public class UWregDAOImpl implements UWregDAO {
 				String courseCRN = myRs.getString("CRN");
 				System.out.printf("crn: %s \n", courseCRN);
 				String courseUSP = myRs.getString("usp");
-				System.out.printf("usp: %s \n", courseUSP);
+				//System.out.printf("usp: %s \n", courseUSP);
 				String courseSubject = myRs.getString("subject");
-				System.out.printf("subject: %s \n", courseSubject);
+				//System.out.printf("subject: %s \n", courseSubject);
 				String courseNumber = myRs.getString("number");
-				System.out.printf("number: %s \n", courseNumber);
+				//System.out.printf("number: %s \n", courseNumber);
 				String courseSection = myRs.getString("section");
-				System.out.printf("section: %s \n", courseSection);
+				//System.out.printf("section: %s \n", courseSection);
 				String courseTitle = myRs.getString("title");
 				
 				int courseCredits = myRs.getInt("credits");
-				System.out.printf("credits: %d \n", courseCredits);
+				//System.out.printf("credits: %d \n", courseCredits);
 				
 				String courseDay = myRs.getString("days");
-				System.out.printf("days: %s \n", courseDay);
+				//System.out.printf("days: %s \n", courseDay);
 				String courseStart = myRs.getString("start");
-				System.out.printf("start: %s \n", courseStart);
+				//System.out.printf("start: %s \n", courseStart);
 				String courseStop = myRs.getString("stop");
-				System.out.printf("stop: %s \n", courseStop);
+				//System.out.printf("stop: %s \n", courseStop);
 				String courseBuilding = myRs.getString("bldg");
-				System.out.printf("bldg: %s \n", courseBuilding);
+				//System.out.printf("bldg: %s \n", courseBuilding);
 				String courseRoom = myRs.getString("room");
-				System.out.printf("room: %s \n", courseRoom);
+				//System.out.printf("room: %s \n", courseRoom);
 								
 				// String courseInstructor= myRs.getString("");
 				String courseInstructor = "Gamboa";
-				String[] courseNotes = {"Note1", "Note2"};
+				//String[] courseNotes = {"Note1", "Note2"};
+				String courseNote = myRs.getString("note"); //{"Note1", "Note2"};
+				ArrayList<String> tempNotesArray1 = new ArrayList<String>();
+				tempNotesArray1.add(courseNote);
+				String[] courseNotes = tempNotesArray1.toArray(new String[0]);
 	    
 				
 				
@@ -694,28 +410,28 @@ public class UWregDAOImpl implements UWregDAO {
 				String courseCRN = myRs.getString("CRN");
 				System.out.printf("crn: %s \n", courseCRN);
 				String courseUSP = myRs.getString("usp");
-				System.out.printf("usp: %s \n", courseUSP);
+				//System.out.printf("usp: %s \n", courseUSP);
 				String courseSubject = myRs.getString("subject");
-				System.out.printf("subject: %s \n", courseSubject);
+				//System.out.printf("subject: %s \n", courseSubject);
 				String courseNumber = myRs.getString("number");
-				System.out.printf("number: %s \n", courseNumber);
+				//System.out.printf("number: %s \n", courseNumber);
 				String courseSection = myRs.getString("section");
-				System.out.printf("section: %s \n", courseSection);
+				//System.out.printf("section: %s \n", courseSection);
 				String courseTitle = myRs.getString("title");
 				
 				int courseCredits = myRs.getInt("credits");
-				System.out.printf("credits: %d \n", courseCredits);
+				//System.out.printf("credits: %d \n", courseCredits);
 				
 				String courseDay = myRs.getString("days");
-				System.out.printf("days: %s \n", courseDay);
+				//System.out.printf("days: %s \n", courseDay);
 				String courseStart = myRs.getString("start");
-				System.out.printf("start: %s \n", courseStart);
+				//System.out.printf("start: %s \n", courseStart);
 				String courseStop = myRs.getString("stop");
-				System.out.printf("stop: %s \n", courseStop);
+				//System.out.printf("stop: %s \n", courseStop);
 				String courseBuilding = myRs.getString("bldg");
-				System.out.printf("bldg: %s \n", courseBuilding);
+				//System.out.printf("bldg: %s \n", courseBuilding);
 				String courseRoom = myRs.getString("room");
-				System.out.printf("room: %s \n", courseRoom);
+				//System.out.printf("room: %s \n", courseRoom);
 								
 				// String courseInstructor= myRs.getString("");
 				String courseInstructor = "Gamboa";
@@ -755,10 +471,10 @@ public class UWregDAOImpl implements UWregDAO {
 		System.out.println(adds.get(0));
 		System.out.println(adds.get(0).isEmpty());
 		
-		System.out.println(drops.size()); // even when empty, size is still 1
-		System.out.println(drops.get(0)); //prints as \n when empty
-		System.out.println(drops.get(0).isEmpty()); // true when not dropping
-		System.out.println(!drops.get(0).isEmpty()); // false when not dropping
+		System.out.println(drops.size()); 
+		System.out.println(drops.get(0)); 
+		System.out.println(drops.get(0).isEmpty()); 
+		System.out.println(!drops.get(0).isEmpty()); 
 		
 		// Add courses
 		if(!adds.get(0).isEmpty()){
@@ -847,6 +563,7 @@ public class UWregDAOImpl implements UWregDAO {
 			System.out.println("The student does not have a valid schedule");
 			
 			// Restore the original schedule
+			
 				// Delete current CRNs
 			for (String element : newCRNs) {
 				 System.out.printf("Courses to remove: %s \n", element);
@@ -893,9 +610,7 @@ public class UWregDAOImpl implements UWregDAO {
 	}
 	
 	public List<String> getCRNsForCourses(List<Course> listOfCourses){
-		
-		//int newCRN = 0;
-		//int [] storedCRNs;
+
 		List<String> storedCRNs = new ArrayList<String>();
 
 		
@@ -992,15 +707,11 @@ public class UWregDAOImpl implements UWregDAO {
 	}
 	
 	
-	//Better name: condenseCourseSchedule
-	public List<Course> condenseCourseSchedule(List<Course> listOfCourses){
-	//public void danielsFunction(List<Course> listOfCourses){
+	
+	public List<Course> condenseCourseSchedule(List<Course> listOfCourses){	
+	
 		
-		System.out.printf("\n\n");
-		System.out.println("Hello, Daniel");
-		System.out.println("**********************  condenseCourseSchedule **********  ");
-		
-		System.out.println(" === COMBINING COURSES === \n");
+		//System.out.println(" === COMBINING COURSES === \n");
         String previousCRN = "x123";
         String previousDay = "";
       //-------------------------------------
@@ -1033,46 +744,49 @@ public class UWregDAOImpl implements UWregDAO {
             String[] currentNotes = null;
             
             loopCounter++ ;
+            /*
             System.out.println("\n\nWhat's the count?");
             System.out.println(loopCounter);
+            */
             
             // Get the current CRN info
             currentCRN = element.getCrn();
+            /*
             System.out.println("The CRN is: ");
             System.out.println(currentCRN);
             System.out.println("The previousCRN is ");
             System.out.println(previousCRN);
             System.out.println("Do the CRNs match?");
             System.out.println(currentCRN.equals(previousCRN));
+            */
             // Get the current days info
             currentDays = element.getDays();
+            /*
             System.out.println("Here are the days");
             System.out.println(currentDays);
             System.out.println("previousDays is ");
             System.out.println(previousDay);
+            */
             // Get the current info
             currentNotes = element.getNotes();
+            /*
             System.out.println("The number of notes is:");
             System.out.println(currentNotes.length);
             System.out.println("The notes are:");
             System.out.println(currentNotes[0]);
             System.out.println(currentNotes[1]);
-            
-            // (1 of 7) Ignore (consecutive) duplicates
-            /*
-            if( (currentCRN.equals(previousCRN)) && (currentDays.equals(previousDay)) ) {
-            	System.out.println("Duplicate course found");
-            	
-            // (2 of 7) A repeated CRN, with more CRNs to come
-            } else if( (currentCRN.equals(previousCRN)) && (loopCounter != listOfCourses.size())) {
             */
             
+            
+         // (1 of 6) A repeated CRN, with more CRNs to come
             if( (currentCRN.equals(previousCRN)) && (loopCounter != listOfCourses.size())) {
-                System.out.println("SAME course found");
+                //System.out.println("SAME course found");
                 
+                /*
                 if (storedDays.contains(currentDays)) {
                 	System.out.println("*** REPEATED DAY ***");
                 }
+                */
                 
                 // Ignore info if the day has already been seen for this course
                 if (!storedDays.contains(currentDays)) {                	
@@ -1083,19 +797,23 @@ public class UWregDAOImpl implements UWregDAO {
                     
                     //Since the CRN has not changed, combine the days
                     storedDays = storedDays + currentDays;
+                    /*
                     System.out.println("Here are the storedDays UPDATED");
                     System.out.println(storedDays);
+                    */
                     
                     //Keep track of the single, most recent day for comparison
                     previousDay = currentDays;
+                    /*
                     System.out.println("Here is previousDay UPDATED");
                     System.out.println(previousDay);
+                    */
                 }
 
                 
                 
 
-            // (3 of 7) A repeated CRN, with no more CRNs to check
+            // (2 of 6) A repeated CRN, with no more CRNs to check
             } else if ((currentCRN.equals(previousCRN)) && (loopCounter == listOfCourses.size())){ 
             	
             	if (!storedDays.contains(currentDays)) { 
@@ -1107,8 +825,10 @@ public class UWregDAOImpl implements UWregDAO {
                     
                     //Since the CRN has not changed, combine the days
                     storedDays = storedDays + currentDays;
+                    /*
                     System.out.println("Here are the storedDays UPDATED");
-                    System.out.println(storedDays);             	
+                    System.out.println(storedDays);            
+                    */ 	
             	}
             	                                           
                 
@@ -1122,14 +842,11 @@ public class UWregDAOImpl implements UWregDAO {
                 Course completeCourse = new Course(previousCRN, storedUsp, storedSubject, storedCNumber, storedSection, storedTitle, storedCredits, storedDays, storedStart, storedStop, storedBuilding, storedRoom, storedInstructor, completeNotes);
                 finalList.add(completeCourse);
                 
-            // (4 of 7) The last CRN is being read in and it's not also the first (and not a repeat)
+            // (3 of 6) The last CRN is being read in and it's not also the first (and not a repeat)
             } else if(loopCounter == listOfCourses.size() && ( !previousCRN.equals("x123") )) {
 
-                System.out.println("This is the last shot \n");
+                // System.out.println("This is the last CRN \n");
 
-                //Create an object for the previous course
-                //String completeDays = "";
-                //completeDays = previousDay;
                 
                 String[] completeNotes = new String[tempNotesArray.size()];
                 completeNotes = tempNotesArray.toArray(completeNotes);
@@ -1157,13 +874,15 @@ public class UWregDAOImpl implements UWregDAO {
                 Course lastCourse = new Course(currentCRN, storedUsp, storedSubject, storedCNumber, storedSection, storedTitle, storedCredits, currentDays, storedStart, storedStop, storedBuilding, storedRoom, storedInstructor, currentNotes);
                 finalList.add(lastCourse);
 
-            // (5 of 7) There first CRN is being read and there are more to come
+            // (4 of 6) There first CRN is being read and there are more to come
             } else if( (previousCRN.equals("x123")) && (loopCounter != listOfCourses.size()) ) {
 
-                System.out.println("This is the first course \n");
+                //System.out.println("This is the first course \n");
                 previousCRN = currentCRN;
+                /*
                 System.out.println("previousCRN has been updated to: ");
                 System.out.println(previousCRN);
+                */
                 
                 //Save the notes and days
                 for(int i=0; i < currentNotes.length; i++){
@@ -1192,7 +911,7 @@ public class UWregDAOImpl implements UWregDAO {
                 previousDay = currentDays;
                 
 
-            // (6 of 7) There is only one CRN
+            // (5 of 6) There is only one CRN
             } else if ( (previousCRN.equals("x123")) && (loopCounter == listOfCourses.size()) ) { 
                 
                 // Create an object for for this one course
@@ -1215,9 +934,9 @@ public class UWregDAOImpl implements UWregDAO {
                 finalList.add(lastCourse);
             	
             	
-            // (7 of 7) A new CRN has been read (it's not the first) and there are more to come
+            // (6 of 6) A new CRN has been read (it's not the first) and there are more to come
             } else {
-                System.out.println("new course found");
+                //System.out.println("new course found");
                 // Create a Course object for the old course
                 //String completeDays = "";
                 //completeDays = previousDay;
@@ -1232,8 +951,10 @@ public class UWregDAOImpl implements UWregDAO {
                 // Save the (new) CRN, days, and notes
                 previousCRN = currentCRN;
                 previousDay = currentDays;
+                /*
                 System.out.println("Here are the days UPDATED");
-                System.out.println(previousDay);                
+                System.out.println(previousDay);        
+                */        
                 tempNotesArray.clear();
                 for(int i=0; i < currentNotes.length; i++){
                     tempNotesArray.add(currentNotes[i]);
@@ -1262,7 +983,7 @@ public class UWregDAOImpl implements UWregDAO {
             
             
             
-        } // end of listOfCourses for loop
+        } 
 		
 		return finalList;
 	}
